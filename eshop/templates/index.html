@@ -1,0 +1,12 @@
+<h1>Eshop - Electronic products</h1>
+<ul>
+    {% for i in product_list %}
+    <li>
+        <strong>Product:</strong> {{ i.title }}<br>
+        <strong>Price:</strong> {{ i.price }}<br>
+        <strong>Desctiption:</strong> {{ i.description }}
+
+    </li>
+
+    {% endfor %}
+</ul>
