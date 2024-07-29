@@ -5,6 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Detail</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            font-size: 2em;
+            text-align: center;
+        }
+        p {
+            font-size: 1em;
+            color: #555;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .review-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .review-list li {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -16,6 +51,24 @@
         <p><strong>Updated:</strong> {{ product.updated }}</p>
         
         <a href="{% url 'product_list' %}" class="btn btn-primary mt-4">Back to Product List</a>
+
+        <div class="mt-5">
+            <p>Sizes:</p>
+            {% for size in product.sizes.all %}
+            <a>{{ size.name }}</a>
+            {% endfor %}
+        </div>
+
+        <h5 class="mt-5">Review products</h5>
+        <ul class="review-list">
+            {% for i in reviews %}
+                <li>
+                    <strong>Author:</strong> {{ i.author }}<br>
+                    <strong>Text:</strong> {{ i.text }}<br>
+                    <strong>Stars:</strong> {{ i.stars }}
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
