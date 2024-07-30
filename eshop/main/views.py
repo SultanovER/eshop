@@ -1,3 +1,5 @@
+from typing import Any
+from django.db.models.query import QuerySet
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from main.models import Product, Review
@@ -6,14 +8,19 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from main.constans import PAGE_SIZE
-
+from django.views import View
+from django.views.generic import ListView, DetailView
 
 def logout_view(request):
     logout(request)
     return redirect('/')
 
-def authorization_view(request):
-    if request.method == 'POST':
+class AuthorizationView(View):
+    def get(self, request, *args, **kwargs):
+        form = UserLoginForm()
+        return render(request, template_name='authorization.html', context={'form': form})
+
+    def post(self, request, *args, **kwargs):
         form = UserLoginForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
@@ -21,9 +28,8 @@ def authorization_view(request):
             user = authenticate(username=username, password=password)
             login(request, user)
             return redirect('/authorization/')
-    else:
-        form = UserLoginForm
-    return render(request, template_name='authorization.html', context={'form': form})
+        return render(request, template_name='authorization.html', context={'form': form})
+
 
 
 def registration_view(request):
@@ -51,53 +57,57 @@ def create_product_view(request):
     }
     return render(request, template_name='add.html', context=context)
 
+
 def product_view(request):
     return render(request, template_name='index.html')
 
-def main_page_view(request):
-    search_word = request.GET.get('search', '')
-    try:
-        page = int(request.GET.get('page', 1))
-    except:
-        page = 1
+class ProductListView(ListView):
+    model = Product
+    template_name = 'index.html'
+    paginate_by = PAGE_SIZE
+    
 
+    def get_queryset(self):
+        search_word = self.request.GET.get('search', '')
+        queryset = super().get_queryset()
+        queryset = queryset.filter(title__icontains=search_word)
+        try:
+            price_from = int(self.request.GET.get('price_from', 0))
+        except:
+            price_from = 0
+        try:
+            price_to = int(self.request.GET.get('price_to'))
+        except:
+            price_to = None
+        if price_from:
+            queryset = queryset.filter(price__gte=price_from)
+        if price_to:
+            queryset = queryset.filter(price__lte=price_to)
+        return queryset
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        total_amount = Product.objects.all().count()
+        buttons = total_amount // PAGE_SIZE
+        if total_amount % PAGE_SIZE > 0:
+            buttons+=1
+        price_from = self.request.GET.get('price_from', '')
+        price_to = self.request.GET.get('price_to', '')
+        search_word = self.request.GET.get('search', '')
+        context['price_from'] = price_from
+        context['price_to'] = price_to
+        context['search_word'] = search_word
+        context['button_list'] = [str(i) for i in range(1, buttons+1)]
+        context['page'] = self.request.GET.get('page', '1')
+        return context
+        
 
-    try:
-        price_from = int(request.GET.get('price_from', 0))
-    except:
-        price_from = 0
+class ProductDetailView(DetailView):
+    model = Product
+    pk_url_kwarg = "id"
+    template_name='product_detail.html'
 
-    try:
-        price_to = int(request.GET.get('price_to'))
-    except:
-        price_to = None
-
-    if search_word is None:
-        search_word = ''
-    products = Product.objects.filter(is_active=True, title__icontains=search_word, price__gte=price_from)
-    if price_to:
-        products = products.filter(price__lte=price_to)
-    products = products.order_by('price', '-created')
-    total_amount = len(products)
-    buttons = total_amount // PAGE_SIZE
-    if total_amount % PAGE_SIZE > 0:
-        buttons+=1
-    context = {
-        'product_list': products[PAGE_SIZE*(page-1):PAGE_SIZE*page],
-        'search_word': search_word,
-        'price_from': price_from if price_from != 0 else '',
-        'price_to': price_to,
-        'button_list': [i for i in range(1, buttons+1)],
-        'page': page
-    }
-    return render(request, template_name='index.html', context=context)
-
-def product_detail_view(request, id):
-    product = Product.objects.get(id=id)
-    reviews = Review.objects.filter(product=product)
-    print(reviews)
-    context = {
-        'product': product,
-        'reviews': reviews
-    }
-    return render(request, template_name='product.html', context=context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product_id = kwargs['object'].id
+        context['rewies'] = Review.objects.filter(product_id=product_id)
+        return context
