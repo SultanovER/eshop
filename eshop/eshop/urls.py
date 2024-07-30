@@ -10,4 +10,7 @@ urlpatterns = [
     path('', views.main_page_view),
     path('add_product/', views.create_product_view),
     path('products/<int:id>/', views.product_detail_view, name='product_detail'),
+    path('registration/', views.registration_view),
+    path('authorization/', views.authorization_view),
+    path('logout/', views.logout_view),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -45,28 +45,28 @@
 <body>
     <div class="container mt-5">
         <h1 class="mb-4">{{ product.title }}</h1>
-        <p><strong>Description:</strong></p>
+        <p><strong>Description/Описание(Модель):</strong></p>
         <p>{{ product.description }}</p>
-        <p><strong>Price:</strong> ${{ product.price }}</p>
-        <p><strong>Created:</strong> {{ product.created }}</p>
-        <p><strong>Updated:</strong> {{ product.updated }}</p>
+        <p><strong>Price/Цена:</strong> ${{ product.price }}</p>
+        <p><strong>Created/Дата добавления:</strong> {{ product.created }}</p>
+        <p><strong>Updated/Дата изменения:</strong> {{ product.updated }}</p>
         
         <div class="mt-5">
-            <p>Sizes:</p>
+            <p>Sizes/Размеры:</p>
             {% for size in product.sizes.all %}
             <a>{{ size.name }}</a>
             {% endfor %}
         </div>
-        <a href="{% url 'product_list' %}" class="btn btn-primary mt-4">Back to Product List</a>
+        <a href="{% url 'product_list' %}" class="btn btn-primary mt-4">Back/Назад</a>
 
 
-        <h5 class="mt-5">Review products</h5>
+        <h5 class="mt-5">Review products/Отзывы</h5>
         <ul class="review-list">
             {% for i in reviews %}
                 <li>
-                    <strong>Author:</strong> {{ i.author }}<br>
-                    <strong>Text:</strong> {{ i.text }}<br>
-                    <strong>Stars:</strong> {{ i.stars }}
+                    <strong>Author/Автор:</strong> {{ i.author }}<br>
+                    <strong>Text/Текст:</strong> {{ i.text }}<br>
+                    <strong>Stars/Оценка:</strong> {{ i.stars }}
                 </li>
             {% endfor %}
         </ul>
