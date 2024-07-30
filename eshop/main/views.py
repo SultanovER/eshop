@@ -1,6 +1,20 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from main.models import Product, Review
+from main.forms import ProductForm
+
+
+def create_product_view(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/')
+    
+    context = {
+        'form': ProductForm()
+    }
+    return render(request, template_name='add.html', context=context)
 
 def product_view(request):
     return render(request, template_name='index.html')
